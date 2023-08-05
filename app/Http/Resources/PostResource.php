@@ -23,7 +23,7 @@ class PostResource extends JsonResource
                 'description' => $post->description,
                 'links' => ['self' => url('posts/' . $post->id)]
             ];
-        })->take(4);
+        })->take(5);
 
         return [
             'total' => $total,
