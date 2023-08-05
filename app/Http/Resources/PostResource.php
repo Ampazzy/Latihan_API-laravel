@@ -6,23 +6,29 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PostResource extends JsonResource
 {
-    //define properti
-    public $status;
-    public $message;
-    public $resource;
 
-    public function __construct($status, $message, $resource)
+    public function __construct($resource)
     {
         parent::__construct($resource);
-        $this->status = $status;
-        $this->message = $message;
     }
     public function toArray($request)
     {
+        $total = $this->resource->count();
+
+        $data = $this->resource->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'name' => $post->name,
+                'price' => $post->price,
+                'description' => $post->description,
+                'links' => ['self' => url('posts/' . $post->id)]
+            ];
+        })->take(4);
+
         return [
-            'success' => $this->status,
-            'message' => $this->message,
-            'data' => $this->resource
+            'total' => $total,
+            'retrieved' => $data->count(),
+            'data' => $data
         ];
     }
 }

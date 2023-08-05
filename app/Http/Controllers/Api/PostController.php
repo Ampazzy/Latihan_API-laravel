@@ -5,63 +5,27 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Post;
-use App\Http\Resources\PostResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Response;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
+use App\Http\Resources\PostResource;
+use App\Http\Resources\PostDetail;
+use App\Http\Resources\PostCreate;
+use App\Http\Resources\PostUpdate;
 
 class PostController extends Controller
 {
     public function index()
     {
-        //ambil semmua data
         $posts = Post::latest()->get();
 
-        //respon berhasil
-        return new PostResource(true, 'Success retrieving foods.', $posts);
+        return new PostResource($posts);
     }
 
     public function store(Request $request)
     {
-        //buat validasi
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'price' => 'required|integer',
-            'description' => 'required',
-        ]);
-
-        //kondisi gagal
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        //buat data
-        $post = Post::create([
-            'name' => $request->name,
-            'price' => $request->price,
-            'description' => $request->description,
-        ]);
-
-        //respon berhasil
-        return new PostResource(true, 'Success add food to database.', $post);
-    }
-
-    public function show($id)
-    {
-        //Cari berdasarkan ID
-        $post = Post::find($id);
-
-        // Kondisi ketika null
-        if (!$post) {
-            return response()->json(['message' => 'The given food resource is not found.'], Response::HTTP_NOT_FOUND);
-        }
-
-        //respon berhasil
-        return new PostResource(true, 'Success retrieving foods.', $post);
-    }
-
-    public function update(Request $request, $id)
-    {
-        //buat validasi
+        //Validasi
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'price' => 'required|integer',
@@ -70,33 +34,102 @@ class PostController extends Controller
 
         //Kondisi gagal
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            $errors = $validator->errors();
+
+            // Ubah format pesan error menjadi array
+            $errorMessages = [];
+            foreach ($errors->all() as $message) {
+                $errorMessages[] = $message;
+            }
+
+            // Buat format respons yang diinginkan
+            $response = [
+                'message' => 'The given data was invalid.',
+                'errors' => $errors->messages(),
+            ];
+
+            return response()->json($response, 422);
         }
 
-        //Cari berdasarkan ID
-        $post = Post::find($id);
 
-        //Update data
-        $post->update([
+        //Create
+        $post = Post::create([
             'name' => $request->name,
             'price' => $request->price,
             'description' => $request->description,
         ]);
 
         //respon berhasil
-        return new PostResource(true, 'Success update the given food resource.', $post);
+        return new PostCreate($post);
+    }
+
+    public function show($id)
+    {
+        try {
+            $post = Post::findOrFail($id);
+            return new PostDetail($post);
+
+            //Kondis tidak ketemu
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'The given food resource is not found.'], 404);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        //Validasi
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'price' => 'required|integer',
+            'description' => 'required',
+        ]);
+
+        //Kondisi gagal
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+
+            // Ubah format pesan error menjadi array
+            $errorMessages = [];
+            foreach ($errors->all() as $message) {
+                $errorMessages[] = $message;
+            }
+
+            // Buat format respons yang diinginkan
+            $response = [
+                'message' => 'The given data was invalid.',
+                'errors' => $errors->messages(),
+            ];
+
+            return response()->json($response, 422);
+        }
+
+        try {
+            $post = Post::findOrFail($id);
+
+            //Update data
+            $post->update([
+                'name' => $request->name,
+                'price' => $request->price,
+                'description' => $request->description,
+            ]);
+
+            return new PostUpdate($post);
+
+            //Kondis tidak ketemu
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'The given food resource is not found.'], 404);
+        }
     }
 
     public function destroy($id)
     {
+        try {
+            $post = Post::findOrFail($id);
 
-        //Cari berdasarkan ID
-        $post = Post::find($id);
-
-        //Hapus data
-        $post->delete();
-
-        //respon berhasil
-        return new PostResource(true, 'Success delete the given food resource.', null);
+            //Hapus data
+            $post->delete();
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'The given food resource is not found.'], 404);
+        }
     }
 }
