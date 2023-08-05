@@ -18,8 +18,8 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        //Membuat ketentuan (Minimal 6 karakter, terdapat campuran huruf dan angka)
         $password = Str::random(random_int(6, 20));
-
         while (!preg_match('/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/', $password)) {
             $password = Str::random(random_int(6, 20));
         }
@@ -28,7 +28,10 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+
+            //Menghilangkan hash agar password dapat diliat
             'password' => $password,
+
             'remember_token' => Str::random(10),
         ];
     }
