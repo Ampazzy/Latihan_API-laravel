@@ -24,9 +24,11 @@ class UserFactory extends Factory
             $password = Str::random(random_int(6, 20));
         }
 
+        $email = fake()->unique()->userName . '@gmail.com';
+
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => $email,
             'email_verified_at' => now(),
 
             //Menghilangkan hash agar password dapat diliat

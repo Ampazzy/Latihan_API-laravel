@@ -46,5 +46,30 @@ class DatabaseSeeder extends Seeder
             'price' => 15000,
             'description' => 'Nama sayuran'
         ]);
+        Post::create([
+            'name' => 'WKerupuk',
+            'price' => 1000,
+            'description' => 'Renyah'
+        ]);
+        Post::create([
+            'name' => 'Pizza',
+            'price' => 150000,
+            'description' => 'Yummy'
+        ]);
+        Post::create([
+            'name' => 'Burger',
+            'price' => 25000,
+            'description' => 'Enak asli ini mah'
+        ]);
+        Post::create([
+            'name' => 'Keripik kentang',
+            'price' => 5000,
+            'description' => 'Kentang tapi ga lembek'
+        ]);
+        Post::create([
+            'name' => 'Jengkol',
+            'price' => 9000,
+            'description' => 'Katanya bikin bau'
+        ]);
     }
 }

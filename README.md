@@ -1,4 +1,4 @@
-Nama : Bagas Rizkiyanto
+## Nama : Bagas Rizkiyanto
 
 1. Sudah bisa auth
 2. Sudah bisa CRUD
